@@ -21,4 +21,15 @@ public class UserController {
         return service.registerUser(dto);
     }
 
+    @GetMapping("/{id}")
+    public UserDto getUserById(@PathVariable Long id) {
+        return service.findUserById(id);
+    }
+
+    @GetMapping("/me")
+    public UserDto getCurrentUser() {
+        // Пока заглушка, потом возьмем email из SecurityContext
+        return null;
+    }
+
 }

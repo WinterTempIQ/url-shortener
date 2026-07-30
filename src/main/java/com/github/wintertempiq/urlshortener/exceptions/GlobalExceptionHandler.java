@@ -32,6 +32,19 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiError handleBadCredentials(BadCredentialsException e) {
+        log.warn("Authentication failed: {}", e.getMessage());
+
+        return ApiError.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .reason("Invalid email or password")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
     @ExceptionHandler(EmailAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleEmailAlreadyExists(EmailAlreadyExistsException e) {
