@@ -2,6 +2,7 @@ package com.github.wintertempiq.urlshortener.user.service;
 
 import com.github.wintertempiq.urlshortener.user.dto.NewUserDto;
 import com.github.wintertempiq.urlshortener.user.dto.UserDto;
+import com.github.wintertempiq.urlshortener.user.entity.User;
 
 public interface UserService {
 
@@ -10,4 +11,6 @@ public interface UserService {
     UserDto findUserById(Long id);
 
     UserDto findUserByEmail(String email);
+
+    User getUserEntityByEmail(String email);
 }

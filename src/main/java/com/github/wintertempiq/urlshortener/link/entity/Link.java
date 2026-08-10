@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "links")
+@NoArgsConstructor
 public class Link {
 
     @Id
@@ -32,5 +32,13 @@ public class Link {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    
+    private Long clickCount;
+
+    private LocalDateTime lastClickedAt;
+
+    public Link(User user, String originalUrl, String shortCode) {
+        this.user = user;
+        this.originalUrl = originalUrl;
+        this.shortCode = shortCode;
+    }
 }
