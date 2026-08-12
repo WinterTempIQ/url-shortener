@@ -32,13 +32,17 @@ public class Link {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    private Long clickCount;
+    @Column(name = "click_count", nullable = false)
+    private Long clickCount = 0L;
 
     private LocalDateTime lastClickedAt;
 
-    public Link(User user, String originalUrl, String shortCode) {
+    private LocalDateTime expiresAt;
+
+    public Link(User user, String originalUrl, String shortCode, LocalDateTime expiresAt) {
         this.user = user;
         this.originalUrl = originalUrl;
         this.shortCode = shortCode;
+        this.expiresAt = expiresAt;
     }
 }
