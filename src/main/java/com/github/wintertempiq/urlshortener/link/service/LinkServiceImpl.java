@@ -41,7 +41,7 @@ public class LinkServiceImpl implements LinkService {
             shortCode = generator.getShortCode();
         }
 
-        Link link = new Link(user, request.getOriginalUrl(), shortCode);
+        Link link = new Link(user, request.getOriginalUrl(), shortCode, request.getExpiresAt());
 
         linkRepository.save(link);
 
@@ -82,15 +82,7 @@ public class LinkServiceImpl implements LinkService {
         Link link = linkRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> new NotFoundException("Link not found"));
 
-        LinkFullDto dto = linkMapper.linkToLinkFullDto(link);
-
-        // Заглушки только если поля null (миграция еще не применена)
-        if (dto.getClickCount() == null) {
-            dto.setClickCount(0L);
-        }
-        // lastClickedAt и expiresAt оставляем как есть из БД (null — валидное значение)
-
-        return dto;
+        return linkMapper.linkToLinkFullDto(link);
     }
 
 }

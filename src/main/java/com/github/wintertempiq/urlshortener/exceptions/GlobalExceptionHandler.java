@@ -58,6 +58,19 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(LinkExpiredException.class)
+    @ResponseStatus(HttpStatus.GONE)
+    public ApiError handleLinkExpired(LinkExpiredException e) {
+        log.warn("Link expired: {}", e.getMessage());
+
+        return ApiError.builder()
+                .status(HttpStatus.GONE.value())
+                .reason("The link cannot be used if its validity period has expired.")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleGeneral(Exception e) {
