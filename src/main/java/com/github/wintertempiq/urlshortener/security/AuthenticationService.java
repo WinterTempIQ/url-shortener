@@ -1,6 +1,7 @@
 package com.github.wintertempiq.urlshortener.security;
 
 import com.github.wintertempiq.urlshortener.exceptions.BadCredentialsException;
+import com.github.wintertempiq.urlshortener.refreshtoken.service.RefreshTokenService;
 import com.github.wintertempiq.urlshortener.user.dto.JwtResponseDto;
 import com.github.wintertempiq.urlshortener.user.dto.LoginRequestDto;
 import com.github.wintertempiq.urlshortener.user.entity.User;
@@ -18,6 +19,7 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     public JwtResponseDto authenticate(LoginRequestDto request) {
         log.info("Attempting authentication for email: {}", request.getEmail());
@@ -34,8 +36,9 @@ public class AuthenticationService {
         }
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
+        String refreshToken = refreshTokenService.createToken(user);
 
         log.info("Authentication successful for email: {}", request.getEmail());
-        return new JwtResponseDto(token, user.getEmail());
+        return new JwtResponseDto(token, refreshToken, user.getEmail());
     }
 }
