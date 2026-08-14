@@ -23,6 +23,8 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
     @Modifying
     long deleteByShortCodeAndUser_Email(String shortCode, String email);
 
+    Optional<Link> findByShortCodeAndUser_Email(String shortCode, String email);
+
     @Modifying(clearAutomatically = true)
     @Query("""
                     UPDATE Link l

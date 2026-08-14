@@ -79,8 +79,14 @@ public class LinkServiceImpl implements LinkService {
 
     @Override
     public LinkFullDto fullLinksInfoByShortCode(String shortCode) {
-        Link link = linkRepository.findByShortCode(shortCode)
-                .orElseThrow(() -> new NotFoundException("Link not found"));
+        log.info("An attempt to get full information about the link.");
+        String email = userContext.getCurrentUserEmail();
+
+        Link link = linkRepository.findByShortCodeAndUser_Email(shortCode, email)
+                .orElseThrow(() -> {
+                    log.warn("Link not found or access denied");
+                    return new NotFoundException("Link not found.");
+                });
 
         return linkMapper.linkToLinkFullDto(link);
     }
