@@ -7,13 +7,13 @@ import com.github.wintertempiq.urlshortener.user.dto.UserDto;
 import com.github.wintertempiq.urlshortener.user.entity.User;
 import com.github.wintertempiq.urlshortener.user.mapper.UserMapper;
 import com.github.wintertempiq.urlshortener.user.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
 
@@ -61,6 +61,12 @@ public class UserServiceImpl implements UserService {
                 });
 
         return userMapper.userToUserDto(user);
+    }
+
+    @Override
+    public User getUserEntityByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
 

@@ -1,4 +1,4 @@
-package com.github.wintertempiq.urlshortener.link.entity;
+package com.github.wintertempiq.urlshortener.refreshtoken.entity;
 
 import com.github.wintertempiq.urlshortener.user.entity.User;
 import jakarta.persistence.*;
@@ -8,12 +8,12 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "refresh_tokens")
 @Getter
 @Setter
-@Entity
-@Table(name = "links")
 @NoArgsConstructor
-public class Link {
+public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,26 +23,23 @@ public class Link {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "original_url", nullable = false)
-    private String originalUrl;
-
     @Column(nullable = false, unique = true)
-    private String shortCode;
+    private String token;
+
+    @Column(name = "expiry_date", nullable = false)
+    private LocalDateTime expiryDate;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "click_count", nullable = false)
-    private Long clickCount = 0L;
+    @Column(nullable = false)
+    private boolean revoked = false;
 
-    private LocalDateTime lastClickedAt;
-
-    private LocalDateTime expiresAt;
-
-    public Link(User user, String originalUrl, String shortCode, LocalDateTime expiresAt) {
+    public RefreshToken(User user, String token, LocalDateTime expiryDate) {
         this.user = user;
-        this.originalUrl = originalUrl;
-        this.shortCode = shortCode;
-        this.expiresAt = expiresAt;
+        this.token = token;
+        this.expiryDate = expiryDate;
     }
+
+
 }

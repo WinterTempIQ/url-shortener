@@ -1,0 +1,3 @@
+ALTER TABLE links
+    ADD COLUMN click_count BIGINT DEFAULT 0,
+    ADD COLUMN last_clicked_at TIMESTAMP WITHOUT TIME ZONE;

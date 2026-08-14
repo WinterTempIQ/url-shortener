@@ -15,4 +15,6 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     User newUserDtoToUser(NewUserDto dto);
+
+    User userDtoToUser(UserDto dto);
 }

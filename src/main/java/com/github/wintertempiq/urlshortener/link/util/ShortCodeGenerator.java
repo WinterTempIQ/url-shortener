@@ -1,0 +1,25 @@
+package com.github.wintertempiq.urlshortener.link.util;
+
+import org.springframework.stereotype.Component;
+
+import java.util.Random;
+
+@Component
+public class ShortCodeGenerator {
+    private static final char[] BASE62 =
+            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+
+    private static final Random RANDOM = new Random();
+
+    public String getShortCode() {
+
+        StringBuilder shortCode = new StringBuilder();
+
+        for (int i = 0; i < 6; i++) {
+            shortCode = shortCode.append(BASE62[RANDOM.nextInt(BASE62.length)]);
+        }
+
+        return shortCode.toString();
+    }
+
+}
