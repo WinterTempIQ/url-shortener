@@ -8,8 +8,6 @@ public interface UserService {
 
     UserDto registerUser(NewUserDto dto);
 
-    UserDto findUserById(Long id);
-
     UserDto findUserByEmail(String email);
 
     User getUserEntityByEmail(String email);

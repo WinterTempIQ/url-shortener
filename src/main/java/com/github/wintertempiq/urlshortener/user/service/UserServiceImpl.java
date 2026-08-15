@@ -41,18 +41,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto findUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("User not found with id: {}", id);
-                    return new NotFoundException("Пользователь не найден.");
-                });
-
-
-        return userMapper.userToUserDto(user);
-    }
-
-    @Override
     public UserDto findUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
