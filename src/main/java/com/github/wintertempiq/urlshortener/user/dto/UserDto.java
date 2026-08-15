@@ -1,11 +1,9 @@
 package com.github.wintertempiq.urlshortener.user.dto;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class UserDto {
 
