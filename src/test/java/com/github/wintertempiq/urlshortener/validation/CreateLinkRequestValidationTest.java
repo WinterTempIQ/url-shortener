@@ -4,6 +4,8 @@ import com.github.wintertempiq.urlshortener.link.dto.CreateLinkRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,16 +17,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CreateLinkRequestValidationTest {
 
+    private ValidatorFactory validatorFactory;
     private Validator validator;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        validator = Validation
-                .buildDefaultValidatorFactory()
-                .getValidator();
+        validatorFactory = Validation
+                .buildDefaultValidatorFactory();
+
+        validator = validatorFactory.getValidator();
 
         objectMapper = new ObjectMapper();
+    }
+
+    @AfterEach
+    void tearDown() {
+        validatorFactory.close();
     }
 
     @Test
