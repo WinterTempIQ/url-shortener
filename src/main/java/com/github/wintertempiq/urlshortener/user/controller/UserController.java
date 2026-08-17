@@ -1,5 +1,6 @@
 package com.github.wintertempiq.urlshortener.user.controller;
 
+import com.github.wintertempiq.urlshortener.security.UserContext;
 import com.github.wintertempiq.urlshortener.user.dto.NewUserDto;
 import com.github.wintertempiq.urlshortener.user.dto.UserDto;
 import com.github.wintertempiq.urlshortener.user.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService service;
+    private final UserContext context;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -21,15 +23,9 @@ public class UserController {
         return service.registerUser(dto);
     }
 
-    @GetMapping("/{id}")
-    public UserDto getUserById(@PathVariable Long id) {
-        return service.findUserById(id);
-    }
-
     @GetMapping("/me")
     public UserDto getCurrentUser() {
-        // Пока заглушка, потом возьмем email из SecurityContext
-        return null;
+        return service.findUserByEmail(context.getCurrentUserEmail());
     }
 
 }
