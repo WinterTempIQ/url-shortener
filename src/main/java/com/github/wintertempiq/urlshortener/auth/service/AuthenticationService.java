@@ -1,9 +1,10 @@
-package com.github.wintertempiq.urlshortener.security;
+package com.github.wintertempiq.urlshortener.auth.service;
 
 import com.github.wintertempiq.urlshortener.exceptions.BadCredentialsException;
 import com.github.wintertempiq.urlshortener.refreshtoken.service.RefreshTokenService;
+import com.github.wintertempiq.urlshortener.security.JwtTokenProvider;
 import com.github.wintertempiq.urlshortener.user.dto.JwtResponseDto;
-import com.github.wintertempiq.urlshortener.user.dto.LoginRequestDto;
+import com.github.wintertempiq.urlshortener.auth.dto.LoginRequestDto;
 import com.github.wintertempiq.urlshortener.user.entity.User;
 import com.github.wintertempiq.urlshortener.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

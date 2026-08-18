@@ -1,12 +1,12 @@
-package com.github.wintertempiq.urlshortener.security;
+package com.github.wintertempiq.urlshortener.auth.controller;
 
 import com.github.wintertempiq.urlshortener.refreshtoken.dto.LogoutRequest;
 import com.github.wintertempiq.urlshortener.refreshtoken.dto.RefreshTokenRequest;
 import com.github.wintertempiq.urlshortener.refreshtoken.dto.TokenResponseDto;
-import com.github.wintertempiq.urlshortener.refreshtoken.repository.RefreshTokenRepository;
 import com.github.wintertempiq.urlshortener.refreshtoken.service.RefreshTokenService;
+import com.github.wintertempiq.urlshortener.auth.service.AuthenticationService;
 import com.github.wintertempiq.urlshortener.user.dto.JwtResponseDto;
-import com.github.wintertempiq.urlshortener.user.dto.LoginRequestDto;
+import com.github.wintertempiq.urlshortener.auth.dto.LoginRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
