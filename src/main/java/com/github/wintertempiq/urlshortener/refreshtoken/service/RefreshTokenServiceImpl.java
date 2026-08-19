@@ -1,6 +1,6 @@
 package com.github.wintertempiq.urlshortener.refreshtoken.service;
 
-import com.github.wintertempiq.urlshortener.exceptions.BadCredentialsException;
+import com.github.wintertempiq.urlshortener.exceptions.AuthenticationFailedException;
 import com.github.wintertempiq.urlshortener.exceptions.NotFoundException;
 import com.github.wintertempiq.urlshortener.refreshtoken.dto.RefreshTokenRequest;
 import com.github.wintertempiq.urlshortener.refreshtoken.dto.TokenResponseDto;
@@ -52,12 +52,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         if (token.isRevoked()) {
             log.warn("Attempt to use revoked refresh token for user: {}", token.getUser().getEmail());
-            throw new BadCredentialsException("Refresh token revoked.");
+            throw new AuthenticationFailedException("Refresh token revoked.");
         }
 
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             log.warn("Expired refresh token for user: {}", token.getUser().getEmail());
-            throw new BadCredentialsException("Refresh token expired.");
+            throw new AuthenticationFailedException("Refresh token expired.");
         }
 
         User user = token.getUser();
