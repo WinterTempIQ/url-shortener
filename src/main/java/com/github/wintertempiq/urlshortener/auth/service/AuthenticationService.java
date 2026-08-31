@@ -1,9 +1,10 @@
-package com.github.wintertempiq.urlshortener.security;
+package com.github.wintertempiq.urlshortener.auth.service;
 
-import com.github.wintertempiq.urlshortener.exceptions.BadCredentialsException;
+import com.github.wintertempiq.urlshortener.auth.dto.LoginRequestDto;
+import com.github.wintertempiq.urlshortener.exceptions.AuthenticationFailedException;
 import com.github.wintertempiq.urlshortener.refreshtoken.service.RefreshTokenService;
+import com.github.wintertempiq.urlshortener.security.JwtTokenProvider;
 import com.github.wintertempiq.urlshortener.user.dto.JwtResponseDto;
-import com.github.wintertempiq.urlshortener.user.dto.LoginRequestDto;
 import com.github.wintertempiq.urlshortener.user.entity.User;
 import com.github.wintertempiq.urlshortener.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +28,12 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
                     log.warn("Authentication failed - user not found");
-                    return new BadCredentialsException("Invalid email or password");
+                    return new AuthenticationFailedException("Invalid email or password");
                 });
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("Authentication failed - invalid password.");
-            throw new BadCredentialsException("Invalid email or password");
+            throw new AuthenticationFailedException("Invalid email or password");
         }
 
         String token = jwtTokenProvider.generateToken(user.getEmail());

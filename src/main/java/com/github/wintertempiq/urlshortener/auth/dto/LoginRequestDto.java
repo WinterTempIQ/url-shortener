@@ -1,4 +1,4 @@
-package com.github.wintertempiq.urlshortener.user.dto;
+package com.github.wintertempiq.urlshortener.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

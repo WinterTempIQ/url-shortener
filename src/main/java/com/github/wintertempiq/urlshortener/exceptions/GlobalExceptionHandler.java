@@ -32,19 +32,6 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(BadCredentialsException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ApiError handleBadCredentials(BadCredentialsException e) {
-        log.warn("Authentication failed: {}", e.getMessage());
-
-        return ApiError.builder()
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .reason("Invalid email or password")
-                .message(e.getMessage())
-                .timestamp(LocalDateTime.now().format(FORMATTER))
-                .build();
-    }
-
     @ExceptionHandler(EmailAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleEmailAlreadyExists(EmailAlreadyExistsException e) {
@@ -66,6 +53,32 @@ public class GlobalExceptionHandler {
         return ApiError.builder()
                 .status(HttpStatus.GONE.value())
                 .reason("The link cannot be used if its validity period has expired.")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
+    @ExceptionHandler(AuthenticationFailedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiError handleAuthenticationFailed(AuthenticationFailedException e) {
+        log.warn("Authentication failed: {}", e.getMessage());
+
+        return ApiError.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .reason("Authentication failed")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
+    @ExceptionHandler(AuthenticationRequiredException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiError handleAuthenticationRequired(AuthenticationRequiredException e) {
+        log.error("Authentication required: {}", e.getMessage());
+
+        return ApiError.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .reason("Authentication required")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
