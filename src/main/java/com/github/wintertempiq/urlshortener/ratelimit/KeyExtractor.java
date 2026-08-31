@@ -15,11 +15,12 @@ import java.util.Map;
 public class KeyExtractor {
 
     private final ObjectMapper objectMapper;
+    private final ClientResolver clientResolver;
 
     public List<RateLimitKey> extractKeys(HttpServletRequest request) {
         List<RateLimitKey> keys = new ArrayList<>();
         String path = request.getRequestURI();
-        String ip = request.getRemoteAddr();
+        String ip = clientResolver.resolveIp(request);
         String method = request.getMethod();
 
         if (path.equals("/api/v1/users/register")) {
