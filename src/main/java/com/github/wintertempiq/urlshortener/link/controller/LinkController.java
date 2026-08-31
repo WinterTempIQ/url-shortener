@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +28,8 @@ public class LinkController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    public Page<LinkShortDto> getLinksByUser(Pageable pageable) {
+    public Page<LinkShortDto> getLinksByUser(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+                                             Pageable pageable) {
         return linkService.findLinksByUser(pageable);
     }
 
