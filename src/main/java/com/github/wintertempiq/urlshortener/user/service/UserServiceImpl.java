@@ -23,11 +23,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto registerUser(NewUserDto dto) {
-        log.info("Попытка регистрации пользователя с email: {}", dto.getEmail());
+        log.info("User registration attempt via email: {}", dto.getEmail());
 
         if (userRepository.existsByEmail(dto.getEmail())) {
-            log.warn("Регистрация прерванна, не уникальный email: {}", dto.getEmail());
-            throw new EmailAlreadyExistsException("Пользователь с " + dto.getEmail() + " уже существует.");
+            log.warn("Registration is interrupted, email is not unique: {}", dto.getEmail());
+            throw new EmailAlreadyExistsException("Failed to register.");
         }
 
         User user = userMapper.newUserDtoToUser(dto);
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
         User saveUser = userRepository.save(user);
 
-        log.info("Успешная регистрация пользователя с email: {}", dto.getEmail());
+        log.info("Successful user registration with email: {}", dto.getEmail());
         return userMapper.userToUserDto(saveUser);
     }
 
@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     log.warn("User not found by email lookup");
-                    return new NotFoundException("Пользователь не найден.");
+                    return new NotFoundException("User not found.");
                 });
 
         return userMapper.userToUserDto(user);
