@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface LinkRepository extends JpaRepository<Link, Long> {
@@ -31,4 +32,12 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
                     WHERE l.shortCode = :shortCode
             """)
     int incrementClickCount(@Param("shortCode") String shortCode);
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+                    DELETE FROM Link l
+                    WHERE l.expiresAt IS NOT NULL
+                    AND l.expiresAt < :now
+            """)
+    long deleteExpired(@Param("now") LocalDateTime now);
 }
