@@ -2,14 +2,14 @@ package com.github.wintertempiq.urlshortener.link.util;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 @Component
 public class ShortCodeGenerator {
     private static final char[] BASE62 =
             "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
-    private static final Random RANDOM = new Random();
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     public String getShortCode() {
 
