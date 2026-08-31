@@ -4,6 +4,11 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+  data:
+    web:
+      pageable:
+        max-page-size: 50
+        default-page-size: 10
 
   jpa:
     hibernate:
