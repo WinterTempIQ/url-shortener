@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class LinkServiceImpl implements LinkService {
+    private static final int MAX_SHORT_CODE_ATTEMPTS = 5;
+    private static final int FALLBACK_CODE_LENGTH = 8;
 
     private final UserContext userContext;
     private final UserService userService;
@@ -34,12 +36,7 @@ public class LinkServiceImpl implements LinkService {
         log.info("Creating link.");
         User user = userService.getUserEntityByEmail(userContext.getCurrentUserEmail());
 
-        String shortCode = generator.getShortCode();
-
-        while (linkRepository.existsByShortCode(shortCode)) {
-            log.warn("Short code collision.");
-            shortCode = generator.getShortCode();
-        }
+        String shortCode = generateUniqueShortCode();
 
         Link link = new Link(user, request.getOriginalUrl(), shortCode, request.getExpiresAt());
 
@@ -89,6 +86,23 @@ public class LinkServiceImpl implements LinkService {
                 });
 
         return linkMapper.linkToLinkFullDto(link);
+    }
+
+    private String generateUniqueShortCode() {
+        for (int attempt = 1; attempt <= MAX_SHORT_CODE_ATTEMPTS; attempt++) {
+            String candidate = generator.getShortCode();
+            if (!linkRepository.existsByShortCode(candidate)) {
+                return candidate;
+            }
+            log.warn("Short code collision on attempt {}/{}", attempt, MAX_SHORT_CODE_ATTEMPTS);
+        }
+        String fallback = generator.getShortCode(FALLBACK_CODE_LENGTH);
+
+        if (linkRepository.existsByShortCode(fallback)) {
+            log.error("Short code generation failed after retries");
+            throw new IllegalStateException("Short code generation failed after retries");
+        }
+        return fallback;
     }
 
 }

@@ -12,10 +12,14 @@ public class ShortCodeGenerator {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public String getShortCode() {
+        return getShortCode(6);
+    }
+
+    public String getShortCode(int length) {
 
         StringBuilder shortCode = new StringBuilder();
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < length; i++) {
             shortCode = shortCode.append(BASE62[RANDOM.nextInt(BASE62.length)]);
         }
 
