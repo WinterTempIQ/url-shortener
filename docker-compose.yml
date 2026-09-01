@@ -1,16 +1,36 @@
 services:
+  app:
+    build: .
+    container_name: url-shortener-app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/url_shortener
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
-    postgres:
+  postgres:
       image: postgres:16-alpine
       container_name: url-shortener-db
       environment:
         POSTGRES_DB: url_shortener
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
+        POSTGRES_USER: ${DB_USERNAME}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
       ports:
         - "5432:5432"
       volumes:
         - postgres-data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d url_shortener"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
 
 volumes:
   postgres-data:
