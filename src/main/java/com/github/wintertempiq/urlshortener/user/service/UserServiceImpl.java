@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto registerUser(NewUserDto dto) {
-        log.info("User registration attempt via email: {}", dto.getEmail());
+        log.info("User registration attempt.");
 
         if (userRepository.existsByEmail(dto.getEmail())) {
             log.warn("Registration is interrupted, email is not unique: {}", dto.getEmail());
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
         User saveUser = userRepository.save(user);
 
-        log.info("Successful user registration with email: {}", dto.getEmail());
+        log.info("Successful user registration with userId={}", saveUser.getId());
         return userMapper.userToUserDto(saveUser);
     }
 

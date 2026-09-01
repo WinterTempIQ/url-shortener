@@ -23,7 +23,7 @@ public class AuthenticationService {
     private final RefreshTokenService refreshTokenService;
 
     public JwtResponseDto authenticate(LoginRequestDto request) {
-        log.info("Attempting authentication for email: {}", request.getEmail());
+        log.info("Attempting authentication.");
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
@@ -39,7 +39,7 @@ public class AuthenticationService {
         String token = jwtTokenProvider.generateToken(user.getEmail());
         String refreshToken = refreshTokenService.createToken(user);
 
-        log.info("Authentication successful for email: {}", request.getEmail());
+        log.info("Authentication successful from user: {}.", user.getId());
         return new JwtResponseDto(token, refreshToken, user.getEmail());
     }
 }

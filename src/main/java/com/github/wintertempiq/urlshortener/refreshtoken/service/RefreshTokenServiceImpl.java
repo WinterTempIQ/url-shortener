@@ -33,7 +33,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public String createToken(User user) {
-        log.info("Creating refresh token for user: {}", user.getEmail());
+        log.info("Creating refresh token for user: {}", user.getId());
         return createAndSaveToken(user);
     }
 
@@ -51,17 +51,17 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 });
 
         if (token.isRevoked()) {
-            log.warn("Attempt to use revoked refresh token for user: {}", token.getUser().getEmail());
+            log.warn("Attempt to use revoked refresh token for user: {}", token.getUser().getId());
             throw new AuthenticationFailedException("Refresh token revoked.");
         }
 
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
-            log.warn("Expired refresh token for user: {}", token.getUser().getEmail());
+            log.warn("Expired refresh token for user: {}", token.getUser().getId());
             throw new AuthenticationFailedException("Refresh token expired.");
         }
 
         User user = token.getUser();
-        log.info("Valid refresh token for user: {}", user.getEmail());
+        log.info("Valid refresh token for user: {}", user.getId());
 
         token.setRevoked(true);
         refreshTokenRepository.save(token);
@@ -70,7 +70,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         String accessToken = jwtTokenProvider.generateToken(user.getEmail());
 
-        log.info("Tokens refreshed successfully for user: {}", user.getEmail());
+        log.info("Tokens refreshed successfully for user: {}", user.getId());
         return new TokenResponseDto(accessToken, newRefreshToken);
     }
 
@@ -89,7 +89,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         token.setRevoked(true);
 
         refreshTokenRepository.save(token);
-        log.info("Refresh token revoked successfully for user: {}", token.getUser().getEmail());
+        log.info("Refresh token revoked successfully for user: {}", token.getUser().getId());
     }
 
     private String createAndSaveToken(User user) {
@@ -104,7 +104,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         refreshTokenRepository.save(entity);
 
-        log.debug("Refresh token saved for user: {}", user.getEmail());
+        log.debug("Refresh token saved for user: {}", user.getId());
         return token;
     }
 }
