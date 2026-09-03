@@ -1,4 +1,4 @@
-package com.github.wintertempiq.urlshortener.link;
+package com.github.wintertempiq.urlshortener.link.service;
 
 import com.github.wintertempiq.urlshortener.exceptions.NotFoundException;
 import com.github.wintertempiq.urlshortener.link.dto.CreateLinkRequest;
@@ -7,7 +7,6 @@ import com.github.wintertempiq.urlshortener.link.dto.LinkShortDto;
 import com.github.wintertempiq.urlshortener.link.entity.Link;
 import com.github.wintertempiq.urlshortener.link.mapper.LinkMapper;
 import com.github.wintertempiq.urlshortener.link.repository.LinkRepository;
-import com.github.wintertempiq.urlshortener.link.service.LinkServiceImpl;
 import com.github.wintertempiq.urlshortener.link.util.ShortCodeGenerator;
 import com.github.wintertempiq.urlshortener.security.UserContext;
 import com.github.wintertempiq.urlshortener.user.entity.User;

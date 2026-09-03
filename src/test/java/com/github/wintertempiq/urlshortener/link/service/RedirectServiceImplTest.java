@@ -1,10 +1,9 @@
-package com.github.wintertempiq.urlshortener.link;
+package com.github.wintertempiq.urlshortener.link.service;
 
 import com.github.wintertempiq.urlshortener.exceptions.LinkExpiredException;
 import com.github.wintertempiq.urlshortener.exceptions.NotFoundException;
 import com.github.wintertempiq.urlshortener.link.entity.Link;
 import com.github.wintertempiq.urlshortener.link.repository.LinkRepository;
-import com.github.wintertempiq.urlshortener.link.service.RedirectServiceImpl;
 import com.github.wintertempiq.urlshortener.user.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
