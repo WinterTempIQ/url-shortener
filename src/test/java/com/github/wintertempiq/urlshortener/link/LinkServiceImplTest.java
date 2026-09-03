@@ -210,7 +210,7 @@ public class LinkServiceImplTest {
 
         when(userContext.getCurrentUserEmail()).thenReturn(email);
         when(linkRepository.deleteByShortCodeAndUser_Email(shortCode, email))
-                .thenReturn(1L); // ← 1 запись удалена
+                .thenReturn(1L); //
 
         linkService.deleteLinkByShortCode(shortCode);
 
