@@ -47,7 +47,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken token = refreshTokenRepository.findByToken(hashToken)
                 .orElseThrow(() -> {
                     log.warn("Refresh token not found");
-                    return new NotFoundException("Token not find.");
+                    return new NotFoundException("Token not found.");
                 });
 
         if (token.isRevoked()) {

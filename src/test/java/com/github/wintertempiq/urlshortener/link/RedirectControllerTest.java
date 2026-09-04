@@ -1,7 +1,8 @@
-package com.github.wintertempiq.urlshortener.link.controller;
+package com.github.wintertempiq.urlshortener.link;
 
 import com.github.wintertempiq.urlshortener.exceptions.LinkExpiredException;
 import com.github.wintertempiq.urlshortener.exceptions.NotFoundException;
+import com.github.wintertempiq.urlshortener.link.controller.RedirectController;
 import com.github.wintertempiq.urlshortener.link.service.RedirectService;
 import com.github.wintertempiq.urlshortener.ratelimit.KeyExtractor;
 import com.github.wintertempiq.urlshortener.ratelimit.RateLimiter;

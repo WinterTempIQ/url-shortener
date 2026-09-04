@@ -1,7 +1,8 @@
-package com.github.wintertempiq.urlshortener.link.controller;
+package com.github.wintertempiq.urlshortener.link;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.wintertempiq.urlshortener.exceptions.NotFoundException;
+import com.github.wintertempiq.urlshortener.link.controller.LinkController;
 import com.github.wintertempiq.urlshortener.link.dto.CreateLinkRequest;
 import com.github.wintertempiq.urlshortener.link.dto.LinkFullDto;
 import com.github.wintertempiq.urlshortener.link.dto.LinkShortDto;
