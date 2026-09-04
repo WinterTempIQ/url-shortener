@@ -13,13 +13,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(RedirectController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -56,7 +52,7 @@ public class RedirectControllerTest {
     }
 
     @Test
-    void redirect_shouldReturn404_whenServiceThrowsNotFound() throws  Exception {
+    void redirect_shouldReturn404_whenServiceThrowsNotFound() throws Exception {
         String shortCode = "123";
 
         when(redirectService.resolveUrl(shortCode)).thenThrow(new NotFoundException("Link not found"));
@@ -66,7 +62,7 @@ public class RedirectControllerTest {
     }
 
     @Test
-    void redirect_shouldReturn410_whenServiceThrowsLinkExpired() throws  Exception {
+    void redirect_shouldReturn410_whenServiceThrowsLinkExpired() throws Exception {
         String shortCode = "123";
 
         when(redirectService.resolveUrl(shortCode)).thenThrow(new LinkExpiredException("Link has expired."));
