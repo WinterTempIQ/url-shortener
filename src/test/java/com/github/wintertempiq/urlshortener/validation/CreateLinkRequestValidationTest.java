@@ -208,4 +208,167 @@ public class CreateLinkRequestValidationTest {
 
         assertFalse(violations.isEmpty());
     }
+
+    @Test
+    void shouldBeValid_whenAliasIsNull() throws Exception {
+        String json = """
+            {
+                "originalUrl": "https://google.com",
+                "alias": null
+            }
+            """;
+
+        CreateLinkRequest request =
+                objectMapper.readValue(json, CreateLinkRequest.class);
+
+        Set<ConstraintViolation<CreateLinkRequest>> violations =
+                validator.validate(request);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void shouldBeValid_whenAliasAbsent() throws Exception {
+        String json = """
+            {
+                "originalUrl": "https://google.com"
+            }
+            """;
+
+        CreateLinkRequest request =
+                objectMapper.readValue(json, CreateLinkRequest.class);
+
+        Set<ConstraintViolation<CreateLinkRequest>> violations =
+                validator.validate(request);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void shouldBeValid_withValidAlias() throws Exception {
+        String json = """
+            {
+                "originalUrl": "https://google.com",
+                "alias": "my-custom_alias9"
+            }
+            """;
+
+        CreateLinkRequest request =
+                objectMapper.readValue(json, CreateLinkRequest.class);
+
+        Set<ConstraintViolation<CreateLinkRequest>> violations =
+                validator.validate(request);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void shouldBeValid_withAliasLowerCase() throws Exception {
+        String json = """
+            {
+                "originalUrl": "https://google.com",
+                "alias": "hello-world"
+            }
+            """;
+
+        CreateLinkRequest request =
+                objectMapper.readValue(json, CreateLinkRequest.class);
+
+        Set<ConstraintViolation<CreateLinkRequest>> violations =
+                validator.validate(request);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void shouldRejectAlias_shorterThan3Chars() throws Exception {
+        String json = """
+            {
+                "originalUrl": "https://google.com",
+                "alias": "ab"
+            }
+            """;
+
+        CreateLinkRequest request =
+                objectMapper.readValue(json, CreateLinkRequest.class);
+
+        Set<ConstraintViolation<CreateLinkRequest>> violations =
+                validator.validate(request);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldRejectAlias_longerThan30Chars() throws Exception {
+        String longAlias = "a".repeat(31);
+
+        String json = """
+            {
+                "originalUrl": "https://google.com",
+                "alias": "%s"
+            }
+            """.formatted(longAlias);
+
+        CreateLinkRequest request =
+                objectMapper.readValue(json, CreateLinkRequest.class);
+
+        Set<ConstraintViolation<CreateLinkRequest>> violations =
+                validator.validate(request);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldRejectAlias_withSpace() throws Exception {
+        String json = """
+            {
+                "originalUrl": "https://google.com",
+                "alias": "my alias"
+            }
+            """;
+
+        CreateLinkRequest request =
+                objectMapper.readValue(json, CreateLinkRequest.class);
+
+        Set<ConstraintViolation<CreateLinkRequest>> violations =
+                validator.validate(request);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldRejectAlias_withNotLatin() throws Exception {
+        String json = """
+            {
+                "originalUrl": "https://google.com",
+                "alias": "привет"
+            }
+            """;
+
+        CreateLinkRequest request =
+                objectMapper.readValue(json, CreateLinkRequest.class);
+
+        Set<ConstraintViolation<CreateLinkRequest>> violations =
+                validator.validate(request);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldRejectAlias_withSpecialChars() throws Exception {
+        String json = """
+            {
+                "originalUrl": "https://google.com",
+                "alias": "alias!"
+            }
+            """;
+
+        CreateLinkRequest request =
+                objectMapper.readValue(json, CreateLinkRequest.class);
+
+        Set<ConstraintViolation<CreateLinkRequest>> violations =
+                validator.validate(request);
+
+        assertFalse(violations.isEmpty());
+    }
 }
