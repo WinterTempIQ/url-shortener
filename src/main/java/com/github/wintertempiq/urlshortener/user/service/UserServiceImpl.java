@@ -9,6 +9,7 @@ import com.github.wintertempiq.urlshortener.user.mapper.UserMapper;
 import com.github.wintertempiq.urlshortener.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,10 +35,10 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        User saveUser = userRepository.save(user);
+        User savedUser = saveUserWithSafetyNet(user);
 
-        log.info("Successful user registration with userId={}", saveUser.getId());
-        return userMapper.userToUserDto(saveUser);
+        log.info("Successful user registration with userId={}", savedUser.getId());
+        return userMapper.userToUserDto(savedUser);
     }
 
     @Override
@@ -57,7 +58,13 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
-
-
+    private User saveUserWithSafetyNet(User user) {
+        try {
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Email duplicate detected on save: {}", user.getEmail());
+            throw new EmailAlreadyExistsException("Failed to register.");
+        }
+    }
 
 }
