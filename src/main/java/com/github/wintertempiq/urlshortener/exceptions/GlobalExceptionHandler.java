@@ -74,11 +74,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationRequiredException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiError handleAuthenticationRequired(AuthenticationRequiredException e) {
-        log.error("Authentication required: {}", e.getMessage());
+        log.warn("Authentication required: {}", e.getMessage());
 
         return ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .reason("Authentication required")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
+    @ExceptionHandler(ShortCodeAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleShortCodeAlreadyExists(ShortCodeAlreadyExistsException e) {
+        log.warn("Short code already exists: {}", e.getMessage());
+
+        return ApiError.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .reason("Short code already exists")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();

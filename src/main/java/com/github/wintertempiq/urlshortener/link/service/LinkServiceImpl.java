@@ -1,6 +1,7 @@
 package com.github.wintertempiq.urlshortener.link.service;
 
 import com.github.wintertempiq.urlshortener.exceptions.NotFoundException;
+import com.github.wintertempiq.urlshortener.exceptions.ShortCodeAlreadyExistsException;
 import com.github.wintertempiq.urlshortener.link.dto.CreateLinkRequest;
 import com.github.wintertempiq.urlshortener.link.dto.LinkFullDto;
 import com.github.wintertempiq.urlshortener.link.dto.LinkShortDto;
@@ -14,6 +15,7 @@ import com.github.wintertempiq.urlshortener.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,14 +38,14 @@ public class LinkServiceImpl implements LinkService {
         log.info("Creating link.");
         User user = userService.getUserEntityByEmail(userContext.getCurrentUserEmail());
 
-        String shortCode = generateUniqueShortCode();
+        String shortCode = resolveShortCode(request);
 
         Link link = new Link(user, request.getOriginalUrl(), shortCode, request.getExpiresAt());
 
-        linkRepository.save(link);
+        Link savedLink = saveLinkWithSafetyNet(link, request);
 
         log.info("Successful link creation.");
-        return linkMapper.linkToLinkShortDto(link);
+        return linkMapper.linkToLinkShortDto(savedLink);
     }
 
     @Override
@@ -103,6 +105,33 @@ public class LinkServiceImpl implements LinkService {
             throw new IllegalStateException("Short code generation failed after retries");
         }
         return fallback;
+    }
+
+    private String resolveShortCode(CreateLinkRequest request) {
+        if (request.getAlias() != null) {
+            if (linkRepository.existsByShortCode(request.getAlias())) {
+                throw new ShortCodeAlreadyExistsException("This shortcode is already taken: " + request.getAlias());
+            }
+
+            return  request.getAlias();
+        }
+
+        return generateUniqueShortCode();
+    }
+
+    private Link saveLinkWithSafetyNet(Link link, CreateLinkRequest request) {
+        if (request.getAlias() == null) {
+            return linkRepository.save(link);
+        }
+
+        try {
+            return linkRepository.save(link);
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Alias collision detected on save: {}", link.getShortCode());
+            throw new ShortCodeAlreadyExistsException(
+                    "This shortcode is already taken: " + link.getShortCode()
+            );
+        }
     }
 
 }
