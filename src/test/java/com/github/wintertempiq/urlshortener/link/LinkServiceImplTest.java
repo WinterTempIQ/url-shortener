@@ -1,6 +1,7 @@
 package com.github.wintertempiq.urlshortener.link;
 
 import com.github.wintertempiq.urlshortener.exceptions.NotFoundException;
+import com.github.wintertempiq.urlshortener.exceptions.ShortCodeAlreadyExistsException;
 import com.github.wintertempiq.urlshortener.link.dto.CreateLinkRequest;
 import com.github.wintertempiq.urlshortener.link.dto.LinkFullDto;
 import com.github.wintertempiq.urlshortener.link.dto.LinkShortDto;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +31,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 
@@ -70,6 +73,9 @@ public class LinkServiceImplTest {
         when(generator.getShortCode()).thenReturn(shortCode);
         when(linkRepository.existsByShortCode(shortCode)).thenReturn(false);
 
+        Link savedLink = new Link(user, request.getOriginalUrl(), shortCode, request.getExpiresAt());
+        when(linkRepository.save(any(Link.class))).thenReturn(savedLink);
+
         LinkShortDto expected = new LinkShortDto();
         expected.setOriginalUrl(request.getOriginalUrl());
         expected.setShortCode(shortCode);
@@ -99,13 +105,16 @@ public class LinkServiceImplTest {
         when(userService.getUserEntityByEmail(user.getEmail())).thenReturn(user);
 
         when(generator.getShortCode())
-                .thenReturn(existingCode)   // попытка 1
-                .thenReturn(existingCode)   // попытка 2
-                .thenReturn(existingCode)   // попытка 3
-                .thenReturn(newCode);       // попытка 4 - успех
+                .thenReturn(existingCode)
+                .thenReturn(existingCode)
+                .thenReturn(existingCode)
+                .thenReturn(newCode);
 
         when(linkRepository.existsByShortCode(existingCode)).thenReturn(true);
         when(linkRepository.existsByShortCode(newCode)).thenReturn(false);
+
+        Link savedLink = new Link(user, request.getOriginalUrl(), newCode, request.getExpiresAt());
+        when(linkRepository.save(any(Link.class))).thenReturn(savedLink);
 
         LinkShortDto expected = new LinkShortDto();
         expected.setOriginalUrl(request.getOriginalUrl());
@@ -155,6 +164,87 @@ public class LinkServiceImplTest {
 
         verify(linkRepository, times(6)).existsByShortCode(anyString());
         verify(linkRepository, never()).save(any(Link.class));
+    }
+
+    @Test
+    void createLink_shouldUseProvidedAlias_whenAvailable() {
+        String email = "bobo@bobo.bob";
+        String alias = "my-alias";
+        User user = new User();
+        user.setEmail(email);
+
+        CreateLinkRequest request = CreateLinkRequest.builder()
+                .originalUrl("https://translate.yandex.ru/")
+                .alias(alias)
+                .build();
+
+        when(userContext.getCurrentUserEmail()).thenReturn(email);
+        when(userService.getUserEntityByEmail(email)).thenReturn(user);
+        when(linkRepository.existsByShortCode(alias)).thenReturn(false);
+
+        Link savedLink = new Link(user, request.getOriginalUrl(), alias, null);
+        when(linkRepository.save(any(Link.class))).thenReturn(savedLink);
+
+        LinkShortDto expected = new LinkShortDto();
+        expected.setOriginalUrl(request.getOriginalUrl());
+        expected.setShortCode(alias);
+        when(linkMapper.linkToLinkShortDto(any(Link.class))).thenReturn(expected);
+
+        LinkShortDto result = linkService.createLink(request);
+
+        assertEquals(alias, result.getShortCode());
+        assertEquals(request.getOriginalUrl(), result.getOriginalUrl());
+        verify(generator, never()).getShortCode();
+        verify(linkRepository).save(any(Link.class));
+        verify(linkMapper).linkToLinkShortDto(any(Link.class));
+    }
+
+    @Test
+    void createLink_shouldThrow_whenAliasAlreadyExists() {
+        String email = "bobo@bobo.bob";
+        String alias = "taken-alias";
+        User user = new User();
+        user.setEmail(email);
+
+        CreateLinkRequest request = CreateLinkRequest.builder()
+                .originalUrl("https://translate.yandex.ru/")
+                .alias(alias)
+                .build();
+
+        when(userContext.getCurrentUserEmail()).thenReturn(email);
+        when(userService.getUserEntityByEmail(email)).thenReturn(user);
+        when(linkRepository.existsByShortCode(alias)).thenReturn(true);
+
+        assertThrows(ShortCodeAlreadyExistsException.class,
+                () -> linkService.createLink(request));
+
+        verify(linkRepository, never()).save(any(Link.class));
+        verify(generator, never()).getShortCode();
+    }
+
+    @Test
+    void createLink_shouldThrow_whenAliasSaveViolatesUniqueConstraint() {
+        String email = "bobo@bobo.bob";
+        String alias = "race-alias";
+        User user = new User();
+        user.setEmail(email);
+
+        CreateLinkRequest request = CreateLinkRequest.builder()
+                .originalUrl("https://translate.yandex.ru/")
+                .alias(alias)
+                .build();
+
+        when(userContext.getCurrentUserEmail()).thenReturn(email);
+        when(userService.getUserEntityByEmail(email)).thenReturn(user);
+        when(linkRepository.existsByShortCode(alias)).thenReturn(false);
+        when(linkRepository.save(any(Link.class)))
+                .thenThrow(new DataIntegrityViolationException("duplicate key value violates unique constraint"));
+
+        assertThrows(ShortCodeAlreadyExistsException.class,
+                () -> linkService.createLink(request));
+
+        verify(linkRepository).existsByShortCode(alias);
+        verify(linkRepository).save(any(Link.class));
     }
 
     @Test
@@ -210,7 +300,7 @@ public class LinkServiceImplTest {
 
         when(userContext.getCurrentUserEmail()).thenReturn(email);
         when(linkRepository.deleteByShortCodeAndUser_Email(shortCode, email))
-                .thenReturn(1L); //
+                .thenReturn(1L);
 
         linkService.deleteLinkByShortCode(shortCode);
 

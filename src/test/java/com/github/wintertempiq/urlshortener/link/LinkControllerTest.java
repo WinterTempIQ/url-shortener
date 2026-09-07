@@ -2,6 +2,7 @@ package com.github.wintertempiq.urlshortener.link;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.wintertempiq.urlshortener.exceptions.NotFoundException;
+import com.github.wintertempiq.urlshortener.exceptions.ShortCodeAlreadyExistsException;
 import com.github.wintertempiq.urlshortener.link.controller.LinkController;
 import com.github.wintertempiq.urlshortener.link.dto.CreateLinkRequest;
 import com.github.wintertempiq.urlshortener.link.dto.LinkFullDto;
@@ -89,6 +90,62 @@ public class LinkControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Invalid request parameters"));
+    }
+
+    @Test
+    void createLink_shouldReturn201_whenValidAliasProvided() throws Exception {
+        CreateLinkRequest request = CreateLinkRequest.builder()
+                .originalUrl("https://www.google.com")
+                .alias("my-custom-link")
+                .build();
+
+        LinkShortDto dto = new LinkShortDto();
+        dto.setOriginalUrl(request.getOriginalUrl());
+        dto.setShortCode("my-custom-link");
+
+        when(linkService.createLink(any(CreateLinkRequest.class))).thenReturn(dto);
+
+        mockMvc.perform(post("/api/v1/links")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.shortCode").value("my-custom-link"))
+                .andExpect(jsonPath("$.originalUrl").value("https://www.google.com"));
+
+        verify(linkService, times(1)).createLink(any(CreateLinkRequest.class));
+    }
+
+    @Test
+    void createLink_shouldReturn400_whenAliasInvalidFormat() throws Exception {
+        CreateLinkRequest request = CreateLinkRequest.builder()
+                .originalUrl("https://www.google.com")
+                .alias("a b")
+                .build();
+
+        mockMvc.perform(post("/api/v1/links")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid request parameters"));
+    }
+
+    @Test
+    void createLink_shouldReturn409_whenAliasConflict() throws Exception {
+        CreateLinkRequest request = CreateLinkRequest.builder()
+                .originalUrl("https://www.google.com")
+                .alias("already-taken")
+                .build();
+
+        when(linkService.createLink(any(CreateLinkRequest.class)))
+                .thenThrow(new ShortCodeAlreadyExistsException("This shortcode is already taken"));
+
+        mockMvc.perform(post("/api/v1/links")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.reason").value("Short code already exists"));
+
+        verify(linkService, times(1)).createLink(any(CreateLinkRequest.class));
     }
 
     @Test
