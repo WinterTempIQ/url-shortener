@@ -9,13 +9,13 @@ import java.time.Duration;
 @Component
 public class BucketFactory {
     private static final Bandwidth IP_LIMIT = Bandwidth.builder()
-            .capacity(20)
-            .refillGreedy(20, Duration.ofMinutes(1))
+            .capacity(50)
+            .refillGreedy(50, Duration.ofMinutes(1))
             .build();
 
     private static final Bandwidth EMAIL_LIMIT = Bandwidth.builder()
-            .capacity(5)
-            .refillGreedy(5, Duration.ofMinutes(1))
+            .capacity(10)
+            .refillGreedy(10, Duration.ofMinutes(1))
             .build();
 
     private static final Bandwidth REDIRECT_LIMIT = Bandwidth.builder()
@@ -29,8 +29,8 @@ public class BucketFactory {
             .build();
 
     private static final Bandwidth CREATE_LINK_LIMIT = Bandwidth.builder()
-            .capacity(3)
-            .refillGreedy(3, Duration.ofMinutes(1))
+            .capacity(5)
+            .refillGreedy(5, Duration.ofMinutes(1))
             .build();
 
     public Bucket createBucket(RuleType type) {

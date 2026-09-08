@@ -26,7 +26,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         if (!path.equals("/api/v1/auth/login") && !path.equals("/api/v1/users/register") &&
-                !path.equals("/api/v1/links") && !path.startsWith("/r/")) {
+                !path.equals("/api/v1/links") && !path.startsWith("/r/") &&
+                !path.equals("/api/v1/auth/refresh") && !path.equals("/api/v1/auth/logout")) {
             filterChain.doFilter(request, response);
             return;
         }

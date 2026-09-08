@@ -48,6 +48,14 @@ public class KeyExtractor {
 
         }
 
+        if (path.equals("/api/v1/auth/refresh") && "POST".equalsIgnoreCase(method)) {
+            keys.add(new RateLimitKey("refresh:ip:" + ip, RuleType.IP));
+        }
+
+        if (path.equals("/api/v1/auth/logout") && "POST".equalsIgnoreCase(method)) {
+            keys.add(new RateLimitKey("logout:ip:" + ip, RuleType.IP));
+        }
+
         return keys;
 
     }
@@ -65,7 +73,7 @@ public class KeyExtractor {
 
         try {
             Map<String, Object> json = objectMapper.readValue(body, Map.class);
-            return (String)  json.get("email");
+            return (String) json.get("email");
         } catch (IOException e) {
             return null;
         }
