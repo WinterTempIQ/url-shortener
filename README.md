@@ -98,9 +98,10 @@ flowchart TB
     RL -. "buckets по\nIP / email / маршруту" .-> Cache[("Caffeine cache")]
 ```
 
-**Важен порядок фильтров:** `RateLimitFilter` стоит раньше `JwtAuthenticationFilter` — троттлинг
-срабатывает ещё до аутентификации запроса. Так, атакующий, долбящий `/auth/login`, получит `429`
-независимо от того, валидные у него креды или нет.
+**Порядок фильтров имеет значение:** `RateLimitFilter` расположен до `JwtAuthenticationFilter`.
+Это гарантирует, что ограничение частоты запросов (троттлинг) срабатывает до попытки аутентификации. 
+Например, при брутфорсе `/auth/login` сервер вернёт `429 Too Many Requests` ещё до проверки логина и пароля, 
+не тратя ресурсы на расшифровку токена или запрос к БД.
 
 ---
 
@@ -141,75 +142,6 @@ erDiagram
 
 ---
 
-## Поток аутентификации
-
-Access-токены — короткоживущие JWT; refresh-токены — непрозрачные строки, хранятся в виде хэша,
-одноразовые и ротируются при каждом обновлении (старый токен отзывается сразу после выдачи нового).
-
-```mermaid
-sequenceDiagram
-    participant C as Клиент
-    participant A as AuthController
-    participant AS as AuthenticationService
-    participant RS as RefreshTokenService
-    participant DB as PostgreSQL
-
-    C->>A: POST /api/v1/auth/login {email, password}
-    A->>AS: authenticate(request)
-    AS->>DB: findByEmail + сверка через BCrypt
-    AS->>RS: createToken(user)
-    RS->>DB: save(hash(refreshToken))
-    AS-->>C: 200 {token, refreshToken, email}
-
-    Note over C: позже access-токен истекает
-
-    C->>A: POST /api/v1/auth/refresh {refreshToken}
-    A->>RS: refreshToken(request)
-    RS->>DB: findByToken(hash) — проверка revoked/expired
-    RS->>DB: пометить старый токен как revoked
-    RS->>DB: сохранить новый хэшированный refresh-токен
-    RS-->>C: 200 {accessToken, refreshToken}
-
-    C->>A: POST /api/v1/auth/logout {refreshToken}
-    A->>RS: revokeToken(refreshToken)
-    RS->>DB: пометить токен как revoked
-    RS-->>C: 204 No Content
-```
-
----
-
-## Поток редиректа
-
-```mermaid
-sequenceDiagram
-    participant C as Клиент
-    participant F as RateLimitFilter
-    participant R as RedirectController
-    participant S as RedirectServiceImpl
-    participant DB as PostgreSQL
-
-    C->>F: GET /r/{shortCode}
-    F->>F: проверка бакетов по IP + shortCode
-    alt лимит превышен
-        F-->>C: 429 Too Many Requests
-    else разрешено
-        F->>R: пропустить запрос дальше
-        R->>S: resolveUrl(shortCode)
-        S->>DB: findByShortCode
-        alt не найдено
-            S-->>C: 404 Not Found
-        else истекла
-            S-->>C: 410 Gone
-        else валидна
-            S->>DB: incrementClickCount
-            S-->>R: originalUrl
-            R-->>C: 302 Found, Location: originalUrl
-        end
-    end
-```
-
----
-
 ## Rate limiting
 
 Лимиты привязаны к IP / email / маршруту через бакеты Bucket4j, закэшированные в Caffeine
@@ -217,9 +149,9 @@ sequenceDiagram
 
 | Бакет | Лимит | Где применяется |
 |---|---|---|
-| `IP` | 20 запросов/мин | регистрация, refresh, logout |
-| `EMAIL` | 5 запросов/мин | login (по email из запроса, в дополнение к IP) |
-| `CREATE_LINK` | 3 запроса/мин | `POST /api/v1/links` |
+| `IP` | 50 запросов/мин | регистрация, refresh, logout |
+| `EMAIL` | 10 запросов/мин | login (по email из запроса, в дополнение к IP) |
+| `CREATE_LINK` | 5 запроса/мин | `POST /api/v1/links` |
 | `REDIRECT` | 100 запросов/мин | по конкретному short code + IP |
 | `REDIRECT_SHORTCODE` | 30 запросов/мин | `GET /r/{shortCode}` по IP |
 
